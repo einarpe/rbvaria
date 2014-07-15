@@ -1,18 +1,24 @@
 #!/usr/bin/env ruby
+# encoding utf-8
 
-# genetinc programming
+# Genetic Programming
+# Example of mutation: the best one are subject to mutation, the worst one are removed.
+# We are trying to find one of some roots of given polynomial function. 
 
+# Useful URL: http://www.geneticprogramming.com/Tutorial
 
-# random number generator
-class RND
+# @author kubar3k
+
+# Random number generator
+class RNG
   @@generator = Random.new
   
   def self.rand(range)
-    return @@generator.rand(range)
+    @@generator.rand(range)
   end
 end
 
-# chromosome
+# Chromosome contains information about polynomial argument
 class Chromosome
   attr_accessor :value
   
@@ -20,51 +26,98 @@ class Chromosome
     @value = value
   end
   
+  # Mutation which means we add some random value to its initial value and return
+  # new chromosome with new argument
   def mutate()
-    @value += RND::rand(-1.0 .. 1.0)
+    Chromosome.new(@value + RNG::rand(-1.0 .. 1.0))
+  end
+
+  def to_s()
+    "[" + ('%.4f' % @value) + "]"
   end
 end
 
 # let's do it!
+# main class of program
 class Genetic
-  attr_reader :generation, :values
+  attr_reader :generation, :population
   attr_accessor :func
-
+  
+  # constructor
+  # @param values_count number of chromosomes in population
+  # @param x_from - left bound of range of arguments where we shall find zero of function
+  # @param x_to - right bound of range of arguments etc. etc. 
   def initialize(values_count, x_from, x_to)
     @generation = 1
     @x_from = x_from
     @x_to = x_to
-    @values = populate(values_count)
+    @population = init_randomly(values_count)
   end
-
+  
+  # fitness function
+  # just return absolute value of polynomial function with given argument 
   def fit(x)
     return (0 - @func.call(x)).abs
   end
-
-  def populate(length)
-    rng = @x_from .. @x_to
+  
+  # 
+  def init_randomly(length)
+    x_range = @x_from .. @x_to
     return Array.new(length) { |el| 
-      el = Chromosome.new( RND::rand(rng) )
+        Chromosome.new( RNG::rand(x_range) )
     }
   end
-  
-  # magic
+
+  # magic! ( ͡° ͜ʖ ͡°) 
   def next()
+    fitness = []
+    
+    # apply fit function
+    @population.each_index { |i|
+      c = @population[i]
+      fitness << {
+        :fit => fit(c.value),
+        :idx => i
+      }
+    }
+    
+    # select one which fit the best
+    fitness.sort! { |f1, f2|
+      f1[:fit] <=> f2[:fit]
+    }
+    
+    best = fitness[0]
+    worst = fitness[fitness.length - 1]
+    
+    # mutate it
+    new_one = @population[ best[:idx] ].mutate
+    
+    # remove one with the worst fit
+    deleted = @population.delete_at( worst[:idx] )
+    
+    # add newly created mutant to population
+    @population << new_one
     
     @generation += 1
   end
 
 end
 
+# -------------------------------------------------------- #
+
 # some sample how it works
-g = Genetic.new(100, -11.0, 11.0)
-g.func = lambda { |x| (-x ** 3) +4 * (x ** 2) + 3.0 * x - 1 }
+g = Genetic.new(24, -11.0, 11.0)
+
+# -x^3 +4x^2 +3x -1
+g.func = lambda { |x| (-x ** 3) + 4 * (x ** 2) + 3.0 * x - 1 }
 
 loop {
   g.next
   break if g.generation >= 1000
 }
 
-print g.values
+print g.population.sort { |c1, c2| 
+  c1.value <=> c2.value
+} .join("\n")
 
 print "\n"
