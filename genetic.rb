@@ -67,9 +67,10 @@ class Genetic
         Chromosome.new( RNG::rand(x_range) )
     }
   end
-
-  # magic! ( ͡° ͜ʖ ͡°) 
-  def next()
+  
+  # compute fitness of each chromosome in population
+  # resulting array is sorted by fitness of each chromosome
+  def fitness_of_population()
     fitness = []
     
     # apply fit function
@@ -81,22 +82,39 @@ class Genetic
       }
     }
     
-    # select one which fit the best
-    fitness.sort! { |f1, f2|
-      f1[:fit] <=> f2[:fit]
-    }
+    # ascending sort by distance from x-axis
+    fitness.sort! { |f1, f2|  f1[:fit] <=> f2[:fit]  }
     
-    best = fitness[0]
-    worst = fitness[fitness.length - 1]
+    return fitness
+  end
+  
+  # mutate the best chromosome
+  def mutate_one(fitness_array)
+    # get the best
+    best = fitness_array[0]
     
     # mutate it
     new_one = @population[ best[:idx] ].mutate
     
-    # remove one with the worst fit
-    deleted = @population.delete_at( worst[:idx] )
-    
     # add newly created mutant to population
     @population << new_one
+  end
+  
+  # remove the worst chromosome, it is so useless...
+  def remove_one(fitness_array)
+    # get the worst
+    worst = fitness_array[fitness_array.length - 1]
+    
+    # remove the one
+    @population.delete_at( worst[:idx] )
+  end
+
+  # magic! ( ͡° ͜ʖ ͡°) 
+  def next()
+    fitness_array = fitness_of_population
+    
+    mutate_one(fitness_array)
+    remove_one(fitness_array)
     
     @generation += 1
   end
