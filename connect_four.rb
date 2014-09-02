@@ -1,0 +1,6 @@
+
+
+def solve(table)
+  
+end
+
