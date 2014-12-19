@@ -1,0 +1,18 @@
+
+ja -> byłem 0.5
+ja -> widziałem 0.25
+ja -> jestem 0.25
+jestem -> tu
+byłem -> tu 0.5
+byłem -> tam 0.5
+widziałem -> to 0.3
+widziałem -> owo 0.7
+to -> $. 0.1
+to -> i  0.9
+owo -> $. 0.4
+owo -> i 0.6
+i -> byłem 0.2
+i -> owo 0.3
+i -> tamto 0.5
+
+
