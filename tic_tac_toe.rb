@@ -3,16 +3,17 @@
 :PLAYER_HUMAN = 1
 :PLAYER_CPU = 10
 
-class Game
+class TicTacToeGame
+  attr_reader :board
 
   def initialize()
     @board = [0, 0, 0, 0, 0, 0, 0, 0, 0]
     @moves_left = 9
   end
 
-  def move(who, pos)
+  def move(player, pos)
     raise "Game is over yet" if @moves_left == 0
-    @board[pos] = who
+    @board[pos] = player
     @moves_left -= 1
   end
 
@@ -32,15 +33,13 @@ class Game
       @board[2] + @board[4] + @board[6]
     ]
 
-    while (check = winning.shift)
-      return :PLAYER_CPU if check == 30
-      return :PLAYER_HUMAN if check == 3
-    end
-
+    return :PLAYER_HUMAN if winning.index(3) != nil
+    return :PLAYER_CPU if winning.index(30) != nil
   end
 
   def to_s()
-    @board.each_index do |cell, i|
+    @board.each_index do |i|
+      cell = @board[i]
       str = "X" if cell == :PLAYER_HUMAN
       str = "O" if cell == :PLAYER_CPU
       print "|%s" % str
@@ -49,6 +48,11 @@ class Game
   end
 end
 
+def minimax(game, player)
+  
+end
+
+
 def main()
-  g = Game.new
+  g = TicTacToeGame.new
 end
